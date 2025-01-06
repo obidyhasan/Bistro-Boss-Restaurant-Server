@@ -10,34 +10,6 @@ const { MongoClient, ServerApiVersion, ObjectId, Admin } = require("mongodb");
 app.use(cors());
 app.use(express.json());
 
-// Verify Token Middleware
-const verifyToken = (req, res, next) => {
-  if (!req.headers.authorization) {
-    return res.status(401).send({ message: "unauthorized access" });
-  }
-  const token = req.headers.authorization.split(" ")[1];
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decode) => {
-    if (err) {
-      return res.status(401).send({ message: "unauthorized access" });
-    }
-    req.decode = decode;
-    next();
-  });
-};
-
-// use verify admin after verifyToken
-const verifyAdmin = async (req, res, admin) => {
-  const email = req.decode.email;
-  const query = { email: email };
-  const user = await userCollection(query);
-  const isAdmin = user?.role === "admin";
-
-  if (!isAdmin) {
-    return res.status(403).send({ message: "forbidden access" });
-  }
-  next();
-};
-
 app.get("/", (req, res) => {
   res.send("Bistro Boss Is Running...");
 });
@@ -58,6 +30,34 @@ async function run() {
     const reviewCollection = client.db("bistroBossDB").collection("reviews");
     const cartCollection = client.db("bistroBossDB").collection("carts");
     const userCollection = client.db("bistroBossDB").collection("users");
+
+    // Verify Token Middleware
+    const verifyToken = (req, res, next) => {
+      if (!req.headers.authorization) {
+        return res.status(401).send({ message: "unauthorized access" });
+      }
+      const token = req.headers.authorization.split(" ")[1];
+      jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decode) => {
+        if (err) {
+          return res.status(401).send({ message: "unauthorized access" });
+        }
+        req.decode = decode;
+        next();
+      });
+    };
+
+    // use verify admin after verifyToken
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decode.email;
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      const isAdmin = user?.role === "admin";
+
+      if (!isAdmin) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      next();
+    };
 
     // JWT Token APIs
     app.post("/api/jwt", async (req, res) => {
