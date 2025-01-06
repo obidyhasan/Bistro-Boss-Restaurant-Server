@@ -64,6 +64,19 @@ async function run() {
       res.send(result);
     });
 
+    // Update User Role
+    app.patch("/api/user/admin/:id", async (req, res) => {
+      const { id } = req.params;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          role: "admin",
+        },
+      };
+      const result = await userCollection.updateOne(filter);
+      res.send(result);
+    });
+
     // Delete User
     app.delete("/api/users/:id", async (req, res) => {
       const { id } = req.params;
