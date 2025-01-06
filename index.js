@@ -10,6 +10,21 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 app.use(cors());
 app.use(express.json());
 
+// Verify Token Middleware
+const verifyToken = (req, res, next) => {
+  if (!req.headers.authorization) {
+    return res.status(401).send({ message: "unauthorized access" });
+  }
+  const token = req.headers.authorization.split(" ")[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decode) => {
+    if (err) {
+      return res.status(401).send({ message: "unauthorized access" });
+    }
+    req.decode = decode;
+    next();
+  });
+};
+
 app.get("/", (req, res) => {
   res.send("Bistro Boss Is Running...");
 });
@@ -53,7 +68,7 @@ async function run() {
 
     // User APIS
     // Get User
-    app.get("/api/users", async (req, res) => {
+    app.get("/api/users", verifyToken, async (req, res) => {
       const result = await userCollection.find().toArray();
       res.send(result);
     });
