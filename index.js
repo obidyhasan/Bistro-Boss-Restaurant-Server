@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
@@ -29,6 +30,15 @@ async function run() {
     const reviewCollection = client.db("bistroBossDB").collection("reviews");
     const cartCollection = client.db("bistroBossDB").collection("carts");
     const userCollection = client.db("bistroBossDB").collection("users");
+
+    // JWT Token APIs
+    app.get("/api/jwt", async (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1d",
+      });
+      res.send({ token });
+    });
 
     // Get Menu Item
     app.get("/api/menus", async (req, res) => {
