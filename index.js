@@ -4,7 +4,7 @@ const app = express();
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId, Admin } = require("mongodb");
 
 // Middleware
 app.use(cors());
@@ -108,6 +108,23 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await userCollection.deleteOne(query);
       res.send(result);
+    });
+
+    // Check User are admin or User
+    app.get("/api/user/admin/:email", verifyToken, async (req, res) => {
+      const { email } = req.params;
+
+      if (email !== req.decode.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      let isAdmin = false;
+      if (user) {
+        isAdmin = user?.role === "admin";
+      }
+      res.send({ isAdmin });
     });
 
     // Get Cart by Email
