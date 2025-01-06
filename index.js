@@ -28,6 +28,7 @@ async function run() {
     const menuCollection = client.db("bistroBossDB").collection("menu");
     const reviewCollection = client.db("bistroBossDB").collection("reviews");
     const cartCollection = client.db("bistroBossDB").collection("carts");
+    const userCollection = client.db("bistroBossDB").collection("users");
 
     // Get Menu Item
     app.get("/api/menus", async (req, res) => {
@@ -37,6 +38,27 @@ async function run() {
 
     app.get("/api/reviews", async (req, res) => {
       const result = await reviewCollection.find().toArray();
+      res.send(result);
+    });
+
+    // User APIS
+    // Get User
+    app.get("/api/users", async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    });
+
+    // Post User
+    app.post("/api/users", async (req, res) => {
+      const userInfo = req.body;
+      const query = { email: userInfo.email };
+      const userExisting = await userCollection.findOne(query);
+
+      if (userExisting) {
+        return res.send({ message: "User already exists", insertedId: null });
+      }
+
+      const result = await userCollection.insertOne(userInfo);
       res.send(result);
     });
 
