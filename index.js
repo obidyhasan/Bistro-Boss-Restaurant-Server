@@ -25,6 +25,19 @@ const verifyToken = (req, res, next) => {
   });
 };
 
+// use verify admin after verifyToken
+const verifyAdmin = async (req, res, admin) => {
+  const email = req.decode.email;
+  const query = { email: email };
+  const user = await userCollection(query);
+  const isAdmin = user?.role === "admin";
+
+  if (!isAdmin) {
+    return res.status(403).send({ message: "forbidden access" });
+  }
+  next();
+};
+
 app.get("/", (req, res) => {
   res.send("Bistro Boss Is Running...");
 });
@@ -47,7 +60,7 @@ async function run() {
     const userCollection = client.db("bistroBossDB").collection("users");
 
     // JWT Token APIs
-    app.get("/api/jwt", async (req, res) => {
+    app.post("/api/jwt", async (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "1d",
@@ -68,7 +81,7 @@ async function run() {
 
     // User APIS
     // Get User
-    app.get("/api/users", verifyToken, async (req, res) => {
+    app.get("/api/users", verifyToken, verifyAdmin, async (req, res) => {
       const result = await userCollection.find().toArray();
       res.send(result);
     });
@@ -90,20 +103,25 @@ async function run() {
     });
 
     // Update User Role
-    app.patch("/api/user/admin/:id", async (req, res) => {
-      const { id } = req.params;
-      const filter = { _id: new ObjectId(id) };
-      const updateDoc = {
-        $set: {
-          role: "admin",
-        },
-      };
-      const result = await userCollection.updateOne(filter, updateDoc);
-      res.send(result);
-    });
+    app.patch(
+      "/api/user/admin/:id",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        const { id } = req.params;
+        const filter = { _id: new ObjectId(id) };
+        const updateDoc = {
+          $set: {
+            role: "admin",
+          },
+        };
+        const result = await userCollection.updateOne(filter, updateDoc);
+        res.send(result);
+      }
+    );
 
     // Delete User
-    app.delete("/api/users/:id", async (req, res) => {
+    app.delete("/api/users/:id", verifyToken, verifyAdmin, async (req, res) => {
       const { id } = req.params;
       const query = { _id: new ObjectId(id) };
       const result = await userCollection.deleteOne(query);
