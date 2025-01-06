@@ -3,7 +3,7 @@ const cors = require("cors");
 const app = express();
 require("dotenv").config();
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 // Middleware
 app.use(cors());
@@ -51,6 +51,8 @@ async function run() {
     // Post User
     app.post("/api/users", async (req, res) => {
       const userInfo = req.body;
+      // insert email if user doesn't exists:
+      // you can do this many ways (1. email unique, 2. upsert, 3. simple check)
       const query = { email: userInfo.email };
       const userExisting = await userCollection.findOne(query);
 
@@ -59,6 +61,14 @@ async function run() {
       }
 
       const result = await userCollection.insertOne(userInfo);
+      res.send(result);
+    });
+
+    // Delete User
+    app.delete("/api/users/:id", async (req, res) => {
+      const { id } = req.params;
+      const query = { _id: new ObjectId(id) };
+      const result = await userCollection.deleteOne(query);
       res.send(result);
     });
 
