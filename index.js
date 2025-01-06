@@ -73,7 +73,7 @@ async function run() {
           role: "admin",
         },
       };
-      const result = await userCollection.updateOne(filter);
+      const result = await userCollection.updateOne(filter, updateDoc);
       res.send(result);
     });
 
