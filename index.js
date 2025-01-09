@@ -74,6 +74,12 @@ async function run() {
       res.send(result);
     });
 
+    app.post("/api/menus", verifyToken, verifyAdmin, async (req, res) => {
+      const productInfo = req.body;
+      const result = await menuCollection.insertOne(productInfo);
+      res.send(result);
+    });
+
     app.get("/api/reviews", async (req, res) => {
       const result = await reviewCollection.find().toArray();
       res.send(result);
