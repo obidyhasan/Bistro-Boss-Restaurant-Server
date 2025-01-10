@@ -89,6 +89,25 @@ async function run() {
       res.send(result);
     });
 
+    // Update Single Product
+    app.patch("/api/menus/:id", verifyToken, verifyAdmin, async (req, res) => {
+      const { id } = req.params;
+      const productInfo = req.body;
+      const query = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          name: productInfo.name,
+          image: productInfo.image,
+          category: productInfo.category,
+          price: productInfo.price,
+          recipe: productInfo.recipe,
+        },
+      };
+
+      const result = await menuCollection.updateOne(query, updateDoc);
+      res.send(result);
+    });
+
     // Delete Product
     app.delete("/api/menus/:id", verifyToken, verifyAdmin, async (req, res) => {
       const { id } = req.params;
