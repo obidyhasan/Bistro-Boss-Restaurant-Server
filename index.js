@@ -74,9 +74,18 @@ async function run() {
       res.send(result);
     });
 
+    // Add Product
     app.post("/api/menus", verifyToken, verifyAdmin, async (req, res) => {
       const productInfo = req.body;
       const result = await menuCollection.insertOne(productInfo);
+      res.send(result);
+    });
+
+    // Delete Product
+    app.delete("/api/menus/:id", verifyToken, verifyAdmin, async (req, res) => {
+      const { id } = req.params;
+      const query = { _id: new ObjectId(id) };
+      const result = await menuCollection.deleteOne(query);
       res.send(result);
     });
 
