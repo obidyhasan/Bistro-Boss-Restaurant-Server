@@ -81,6 +81,14 @@ async function run() {
       res.send(result);
     });
 
+    // Get Single Product
+    app.get("/api/menus/:id", async (req, res) => {
+      const { id } = req.params;
+      const filter = { _id: new ObjectId(id) };
+      const result = await menuCollection.findOne(filter);
+      res.send(result);
+    });
+
     // Delete Product
     app.delete("/api/menus/:id", verifyToken, verifyAdmin, async (req, res) => {
       const { id } = req.params;
