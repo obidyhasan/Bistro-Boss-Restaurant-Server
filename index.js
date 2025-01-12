@@ -232,7 +232,7 @@ async function run() {
       // carefully delete each item from the cart
       const query = {
         _id: {
-          $in: payment.carrIds.map((id) => new ObjectId(id)),
+          $in: payment.cartIds.map((id) => new ObjectId(id)),
         },
       };
       const deleteResult = await cartCollection.deleteMany(query);
