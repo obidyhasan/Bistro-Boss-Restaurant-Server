@@ -245,7 +245,7 @@ async function run() {
         return res.status(403).send({ message: "forbidden access" });
       }
       const query = { email: email };
-      const result = await paymentCollection.find(query);
+      const result = await paymentCollection.find(query).toArray();
       res.send(result);
     });
 
