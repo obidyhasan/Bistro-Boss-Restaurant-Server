@@ -239,6 +239,16 @@ async function run() {
       res.send({ paymentResult, deleteResult });
     });
 
+    app.get("/api/payments/:email", verifyToken, async (req, res) => {
+      const { email } = req.params;
+      if (email !== req.decode.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      const query = { email: email };
+      const result = await paymentCollection.find(query);
+      res.send(result);
+    });
+
     await client.connect();
     await client.db("admin").command({ ping: 1 });
     console.log(
