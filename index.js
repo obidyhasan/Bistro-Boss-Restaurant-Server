@@ -31,6 +31,7 @@ async function run() {
     const reviewCollection = client.db("bistroBossDB").collection("reviews");
     const cartCollection = client.db("bistroBossDB").collection("carts");
     const userCollection = client.db("bistroBossDB").collection("users");
+    const paymentCollection = client.db("bistroBossDB").collection("payments");
 
     // Verify Token Middleware
     const verifyToken = (req, res, next) => {
@@ -221,6 +222,21 @@ async function run() {
         payment_method_types: ["card"],
       });
       res.send({ clientSecret: paymentIntent.client_secret });
+    });
+
+    // crate payment history
+    app.post("/api/payments", verifyToken, async (req, res) => {
+      const payment = req.body;
+      const paymentResult = await paymentCollection.insertOne(payment);
+
+      // carefully delete each item from the cart
+      const query = {
+        _id: {
+          $in: payment.carrIds.map((id) => new ObjectId(id)),
+        },
+      };
+      const deleteResult = await cartCollection.deleteMany(query);
+      res.send({ paymentResult, deleteResult });
     });
 
     await client.connect();
