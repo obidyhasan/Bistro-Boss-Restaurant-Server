@@ -247,7 +247,7 @@ async function run() {
       const deleteResult = await cartCollection.deleteMany(query);
 
       mg.messages
-        .create("sandbox-123.mailgun.org", {
+        .create("sandboxac9b656e56eb470d99bfa7ee8fe557d4.mailgun.org", {
           from: "Excited User <mailgun@sandboxac9b656e56eb470d99bfa7ee8fe557d4.mailgun.org>",
           to: ["obidyhasan@gmail.com"],
           subject: "Bistro Boss Order Confirmation",
